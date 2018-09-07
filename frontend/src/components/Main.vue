@@ -9,8 +9,9 @@
             v-model="project"
             :fetch-suggestions="queryProject"
             placeholder="输入 Project 名称"
+            @keyup.enter.native="search"
             @select="handleSelect">
-            <template slot="prepend">仓库</template>
+            <template slot="prepend">Project</template>
           </el-autocomplete>
         </el-col>
         <el-col :span="10">
@@ -19,8 +20,9 @@
             v-model="manifest"
             :fetch-suggestions="queryManifest"
             placeholder="输入 Manifest 文件名"
+            @keyup.enter.native="search"
             @select="handleSelect">
-            <template slot="prepend">Manifest 文件</template>
+            <template slot="prepend">Manifest File</template>
           </el-autocomplete>
         </el-col>
         <el-col :span="4">
@@ -46,19 +48,19 @@
         <el-table-column
           prop="manifest"
           header-align="center"
-          label="Manifest 文件"
+          label="Manifest File"
           width="'25%'">
         </el-table-column>
         <el-table-column
           prop="project"
           header-align="center"
-          label="仓库"
+          label="Project"
           width="'25%'">
         </el-table-column>
         <el-table-column
           prop="path"
           header-align="center"
-          label="路径"
+          label="Path"
           width="'25%'">
         </el-table-column>
         <el-table-column
@@ -108,16 +110,14 @@
         console.log(item);
       },
       loadDataFromManifest(filterProject) {
-        let manifest = this.manifest.replace(/\//g, this.SEPARATOR);
+        let manifest = this.manifest.replace(/\//g, this.SEPARATOR).trim();
         this.$axios.get('/static/manifests/' + manifest).then((res) => {
           // console.log(res.data)
           if (!filterProject) {
             this.tableData = res.data
           } else {
             this.tableData = res.data.filter((val) => {
-              // console.log(val.project + '-' + this.project)
-              // console.log(val.project.trim() === this.project.trim())
-              return val.project.trim() === this.project.trim()
+              return val.project === this.project
             });
             if (this.tableData.length === 0) {
               this.$message.error('没有匹配项：' + this.manifest + ' 和 ' + this.project);
@@ -131,7 +131,7 @@
       },
 
       loadDataFromProject() {
-        let project = this.project.replace(/\//g, this.SEPARATOR, -1);
+        let project = this.project.replace(/\//g, this.SEPARATOR, -1).trim();
         console.log(project)
         this.$axios.get('/static/projects/' + project).then((res) => {
           // console.log(res.data)
@@ -144,6 +144,8 @@
       },
 
       search() {
+        this.project = this.project.trim();
+        this.manifest = this.manifest.trim();
         if (this.project === '' && this.manifest === '') {
           this.$message.error('仓库 和 Manifest 文件 需要至少填写一项');
         } else if (this.project === '') {
@@ -180,19 +182,22 @@
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style lang="scss">
+<style>
   #main-container {
     margin: 20px 26px 26px 20px;
-
-    .el-header {
-      padding: 0;
-    }
-    .inline-input {
-      width: 100%;
-      margin-right: 10px;
-    }
-    .inline-button {
-      width: 100%;
-    }
   }
+
+  #main-container .el-header {
+    padding: 0;
+  }
+
+  #main-container .inline-input {
+    width: 100%;
+    margin-right: 10px;
+  }
+
+  #main-container .inline-button {
+    width: 100%;
+  }
+
 </style>

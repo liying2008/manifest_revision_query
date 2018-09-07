@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from xml.dom import minidom
 
+import tools
+
 __author__ = 'liying'
 
 
@@ -23,6 +25,8 @@ class Manifest(object):
         self.remote = remote
         self.default = default
         self.items = {}
+        # 重复的 project
+        self.duplicate_projects = {}
 
     def parse_remote(self, remote_tag):
         if remote_tag.hasAttribute('revision'):
@@ -55,17 +59,41 @@ class Manifest(object):
                 item.revision = self.default['revision']
         else:
             item.revision = self.default['revision']
-        self.items[project] = item
+        if project in self.items:
+            # project 之前已存在
+            print('#1: ', project + ' duplicate')
+            num = self.duplicate_projects.get(project, 1)
+            num += 1
+            self.duplicate_projects[project] = num
+            self.items[project + tools.SEPARATOR + str(num)] = item
+        else:
+            self.items[project] = item
 
     def parse_include(self, include_tag):
         manifest_name = include_tag.getAttribute('name')
         manifest = Manifest(manifest_name, remote=self.remote, default=self.default)
         items = manifest.parse()
-        self.items = dict(self.items, **items)
+        for project, item in items.items():
+            # 真实的 project 为 @@ 之前的名称
+            project = project.split(tools.SEPARATOR)[0]
+            if project not in self.items:
+                self.items[project] = item
+            else:
+                # project 之前已存在
+                print('#2: ', project + ' duplicate')
+                num = self.duplicate_projects.get(project, 1)
+                num += 1
+                self.duplicate_projects[project] = num
+                self.items[project + tools.SEPARATOR + str(num)] = item
 
     def parse_remove_project(self, remove_project_tag):
         name = remove_project_tag.getAttribute('name')
-        del self.items[name]
+        if name in self.items:
+            del self.items[name]
+        if name in self.duplicate_projects:
+            num = self.duplicate_projects[name]
+            for i in range(2, num + 1):
+                del self.items[name + tools.SEPARATOR + str(i)]
 
     def parse(self):
         print(self.manifest_file)
@@ -94,5 +122,5 @@ class Manifest(object):
         # print(self.remote)
         # print(self.default)
         for project, item in self.items.items():
-            print(project + '--' + item.path + '--' + item.revision)
+            print(project + '; ' + item.path + '; ' + item.revision)
         return self.items
