@@ -1,8 +1,8 @@
 <template>
-  <div id="main-container">
+  <div id="main-container" @keyup.native="keyCheck(event)">
     <el-header>
       <el-row class="autocomplete"
-              gutter="40">
+              :gutter="40">
         <el-col :span="10">
           <el-autocomplete
             class="inline-input"
@@ -36,9 +36,11 @@
     <el-container>
       <el-table
         :data="tableData"
-        height="800"
+        :height="tableHeight"
+        v-loading="loading"
         align="left"
         border
+        @cell-dblclick="searchProject"
         highlight-current-row
         style="width: 100%">
         <el-table-column
@@ -47,24 +49,28 @@
         </el-table-column>
         <el-table-column
           prop="manifest"
+          sortable
           header-align="center"
           label="Manifest File"
           width="'25%'">
         </el-table-column>
         <el-table-column
           prop="project"
+          sortable
           header-align="center"
           label="Project"
           width="'25%'">
         </el-table-column>
         <el-table-column
           prop="path"
+          sortable
           header-align="center"
           label="Path"
           width="'25%'">
         </el-table-column>
         <el-table-column
           prop="revision"
+          sortable
           header-align="center"
           label="Revision"
           width="'25%'">
@@ -80,7 +86,10 @@
 
     data() {
       return {
+        tableHeight: window.innerHeight - 128,
+        loading: false,
         SEPARATOR: '@@',
+        menuVisible: false,
         project: '',
         manifest: '',
         projects: [],
@@ -89,6 +98,30 @@
       }
     },
     methods: {
+      keyCheck(event) {
+        // 没有效果
+        console.log(event);
+      },
+      searchProject(row, column, cell, event) {
+        console.log(row);
+        console.log(column);
+        console.log(cell);
+        console.log(event);
+        if (column.property === 'manifest') {
+          // 双击的 project
+          let manifest = cell.textContent;
+          this.manifest = manifest;
+          this.project = '';
+          this.loadDataFromManifest(false)
+        }
+        else if (column.property === 'project') {
+          // 双击的 project
+          let project = cell.textContent;
+          this.project = project;
+          this.manifest = '';
+          this.loadDataFromProject()
+        }
+      },
       queryProject(queryString, cb) {
         var projects = this.projects;
         var results = queryString ? projects.filter(this.createFilter(queryString)) : projects;
@@ -144,6 +177,7 @@
       },
 
       search() {
+        this.loading = true;
         this.project = this.project.trim();
         this.manifest = this.manifest.trim();
         if (this.project === '' && this.manifest === '') {
@@ -158,6 +192,7 @@
           // project 和 manifest 都有值
           this.loadDataFromManifest(true)
         }
+        this.loading = false;
       }
     },
     mounted() {
