@@ -7,27 +7,32 @@
           <el-autocomplete
             class="inline-input"
             v-model="project"
+            clearable
             :fetch-suggestions="queryProject"
-            placeholder="输入 Project 名称"
-            @keyup.enter.native="search"
+            :placeholder="projectInputPlaceholder"
             @select="handleSelect">
-            <template slot="prepend">Project</template>
+            <el-select v-model="select" slot="prepend" :value="select">
+              <el-option label="Project" value="project"></el-option>
+              <el-option label="Path" value="path"></el-option>
+            </el-select>
           </el-autocomplete>
         </el-col>
         <el-col :span="10">
           <el-autocomplete
             class="inline-input"
+            clearable
             v-model="manifest"
+            ref="input_manifest"
             :fetch-suggestions="queryManifest"
-            placeholder="输入 Manifest 文件名"
-            @keyup.enter.native="search"
+            placeholder="Please enter manifest file name"
             @select="handleSelect">
             <template slot="prepend">Manifest File</template>
           </el-autocomplete>
         </el-col>
         <el-col :span="4">
           <el-button class="inline-button"
-                     @click="search">搜索
+                     icon="el-icon-search"
+                     @click="search">Search
           </el-button>
         </el-col>
       </el-row>
@@ -81,34 +86,94 @@
 </template>
 
 <script>
+  import {LOCAL_STORAGE_SELECT, SEPARATOR} from '@/components/constants';
+
   export default {
     name: 'Main',
 
     data() {
       return {
-        tableHeight: window.innerHeight - 128,
+        tableHeight: window.innerHeight - 124,
         loading: false,
-        SEPARATOR: '@@',
-        menuVisible: false,
+        select: 'project',
         project: '',
         manifest: '',
         projects: [],
+        paths: [],
         manifests: [],
         tableData: []
       }
     },
+    computed: {
+      projectInputPlaceholder() {
+        if (this.select === 'project') {
+          return 'Please enter project name'
+        } else {
+          return 'Please enter path'
+        }
+      }
+    },
+    watch: {
+      select: function (newValue, oldValue) {
+        // 将用户的选择持久化存储到 Local Storage
+        localStorage.setItem(LOCAL_STORAGE_SELECT, newValue);
+      }
+    },
+    mounted() {
+      // 从 Local Storage 中读取用户上次的选择
+      let select = localStorage.getItem(LOCAL_STORAGE_SELECT);
+      if (select === 'project' || select === 'path') {
+        this.select = select
+      }
+      // project 自动完成列表
+      this.$axios.get('/static/projects.list').then((res) => {
+        let projects = res.data.split('\n');
+        this.projects = projects.map(project => {
+          let obj = {};
+          obj.value = project;
+          return obj
+        });
+      });
+      // path 自动完成列表
+      this.$axios.get('/static/paths.list').then((res) => {
+        let paths = res.data.split('\n');
+        this.paths = paths.map(path => {
+          let obj = {};
+          obj.value = path;
+          return obj
+        });
+      });
+      // manifest 自动完成列表
+      this.$axios.get('/static/manifests.list').then((res) => {
+        let manifests = res.data.split('\n');
+        this.manifests = manifests.map(manifest => {
+          let obj = {};
+          obj["value"] = manifest;
+          return obj
+        });
+      });
+      // 全局添加按键监听
+      document.onkeydown = (event) => {
+        this.keyCheck(event)
+      }
+    },
     methods: {
       keyCheck(event) {
-        // 没有效果
+        // 键盘按键监听处理
         console.log(event);
+        if (event.code === 'Enter') {
+          this.search()
+        } else if (event.code === 'Slash' && event.shiftKey) {
+          // 显示网站帮助
+        }
       },
       searchProject(row, column, cell, event) {
-        console.log(row);
-        console.log(column);
-        console.log(cell);
-        console.log(event);
+        // console.log(row);
+        // console.log(column);
+        // console.log(cell);
+        // console.log(event);
         if (column.property === 'manifest') {
-          // 双击的 project
+          // 双击的 manifest
           let manifest = cell.textContent;
           this.manifest = manifest;
           this.project = '';
@@ -118,19 +183,33 @@
           // 双击的 project
           let project = cell.textContent;
           this.project = project;
+          this.select = 'project';
+          this.manifest = '';
+          this.loadDataFromProject()
+        }
+        else if (column.property === 'path') {
+          // 双击的 path
+          let path = cell.textContent;
+          this.project = path;
+          this.select = 'path';
           this.manifest = '';
           this.loadDataFromProject()
         }
       },
       queryProject(queryString, cb) {
-        var projects = this.projects;
-        var results = queryString ? projects.filter(this.createFilter(queryString)) : projects;
+        let projects = [];
+        if (this.select === 'project') {
+          projects = this.projects;
+        } else {
+          projects = this.paths;
+        }
+        let results = queryString ? projects.filter(this.createFilter(queryString)) : projects;
         // 调用 callback 返回建议列表的数据
         cb(results);
       },
       queryManifest(queryString, cb) {
-        var manifests = this.manifests;
-        var results = queryString ? manifests.filter(this.createFilter(queryString)) : manifests;
+        let manifests = this.manifests;
+        let results = queryString ? manifests.filter(this.createFilter(queryString)) : manifests;
         // 调用 callback 返回建议列表的数据
         cb(results);
       },
@@ -140,20 +219,25 @@
         };
       },
       handleSelect(item) {
-        console.log(item);
+        // 点击选中建议项时触发
+        // console.log(item);
       },
       loadDataFromManifest(filterProject) {
-        let manifest = this.manifest.replace(/\//g, this.SEPARATOR).trim();
+        let manifest = this.manifest.replace(/\//g, SEPARATOR).trim();
         this.$axios.get('/static/manifests/' + manifest).then((res) => {
           // console.log(res.data)
           if (!filterProject) {
             this.tableData = res.data
           } else {
             this.tableData = res.data.filter((val) => {
-              return val.project === this.project
+              if (this.select === 'project') {
+                return val.project === this.project
+              } else {
+                return val.path === this.project
+              }
             });
             if (this.tableData.length === 0) {
-              this.$message.error('没有匹配项：' + this.manifest + ' 和 ' + this.project);
+              this.$message.error('没有匹配项：' + this.manifest + ' & ' + this.project);
             }
           }
         }).catch(error => {
@@ -164,15 +248,25 @@
       },
 
       loadDataFromProject() {
-        let project = this.project.replace(/\//g, this.SEPARATOR, -1).trim();
-        console.log(project)
-        this.$axios.get('/static/projects/' + project).then((res) => {
+        let project = this.project.replace(/\//g, SEPARATOR, -1).trim();
+        console.log(project);
+        let url = '';
+        if (this.select === 'project') {
+          url = '/static/projects/' + project
+        } else {
+          url = '/static/paths/' + project
+        }
+        this.$axios.get(url).then((res) => {
           // console.log(res.data)
           this.tableData = res.data
         }).catch(error => {
           console.log(error);
           this.tableData = [];
-          this.$message.error('未找到 Project：' + this.project);
+          if (this.select === 'project') {
+            this.$message.error('未找到 Project：' + this.project);
+          } else {
+            this.$message.error('未找到 Path：' + this.project);
+          }
         });
       },
 
@@ -181,7 +275,7 @@
         this.project = this.project.trim();
         this.manifest = this.manifest.trim();
         if (this.project === '' && this.manifest === '') {
-          this.$message.error('仓库 和 Manifest 文件 需要至少填写一项');
+          this.$message.error('Project/Path 和 Manifest 需要至少填写一项');
         } else if (this.project === '') {
           // manifest 有值
           this.loadDataFromManifest(false)
@@ -195,24 +289,6 @@
         this.loading = false;
       }
     },
-    mounted() {
-      this.$axios.get('/static/projects.list').then((res) => {
-        let projects = res.data.split('\n');
-        this.projects = projects.map(project => {
-          let obj = {};
-          obj.value = project;
-          return obj
-        });
-      });
-      this.$axios.get('/static/manifests.list').then((res) => {
-        let manifests = res.data.split('\n');
-        this.manifests = manifests.map(manifest => {
-          let obj = {};
-          obj["value"] = manifest;
-          return obj
-        });
-      })
-    }
   }
 </script>
 
@@ -235,4 +311,15 @@
     width: 100%;
   }
 
+  #main-container .el-select .el-input {
+    width: 130px;
+  }
+
+  #main-container .el-table td {
+    padding: 8px 0;
+  }
+
+  #main-container .el-table th {
+    padding: 4px 0;
+  }
 </style>

@@ -12,7 +12,7 @@
 
 <style>
   body {
-    width: 90%;
+    width: 94%;
     display: block;
     margin: 0 auto;
   }
@@ -23,6 +23,6 @@
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
     color: #2c3e50;
-    margin-top: 40px;
+    margin-top: 38px;
   }
 </style>

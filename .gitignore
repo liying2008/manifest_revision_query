@@ -1,4 +1,5 @@
 .idea
+*.pyc
 manifests
 venv
 __pycache__

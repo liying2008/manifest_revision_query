@@ -2,5 +2,6 @@
   "manifest_root_dir": "manifests",
   "manifest_dirs_for_query": [
   ],
-  "manifest_file_list": "manifest_files.txt"
+  "manifest_file_list": "manifest_files.txt",
+  "analysis_upstream_first": true
 }
