@@ -16,7 +16,9 @@ yarn-error.log*
 
 static/manifests
 static/projects
+static/paths
 static/manifests.list
 static/projects.list
+static/paths.list
 
 package-lock.json

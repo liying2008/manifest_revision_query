@@ -13,8 +13,9 @@ __author__ = 'liying'
 
 def read_config():
     """读取配置"""
-    with open('config.json') as fp:
+    with open(config_file_name) as fp:
         config_obj = json.load(fp)
+
     local_config = Config()
     local_config.manifest_root_dir = config_obj.get('manifest_root_dir', 'manifests')
     local_config.manifest_dirs_for_query = config_obj.get('manifest_dirs_for_query', [])
@@ -25,16 +26,19 @@ def read_config():
             for line in lines:
                 if line.strip() != '':
                     local_config.manifest_file_list.append(line)
+
+    local_config.analysis_upstream_first = config_obj.get('analysis_upstream_first', True)
+    local_config.frontend_static_dir = config_obj.get('frontend_static_dir', 'frontend/static')
     return local_config
 
 
-def parse_manifest(root_dir, manifest_file_list):
+def parse_manifest(root_dir, manifest_file_list, analysis_upstream_first):
     """解析 manifest 文件"""
     current_path = os.path.abspath('.')
     os.chdir(root_dir)
     for manifest_file in manifest_file_list:
-        manifest = Manifest(manifest_file)
-        item_dict = manifest.parse()
+        manifest = Manifest(manifest_file, analysis_upstream_first=analysis_upstream_first)
+        item_dict, _, _, _ = manifest.parse()
         project.add_manifest_and_dict(manifest_file, item_dict)
         os.chdir(current_path)
         tools.dict_to_json_file(manifest_file, item_dict)
@@ -42,6 +46,7 @@ def parse_manifest(root_dir, manifest_file_list):
 
     os.chdir(current_path)
     tools.projects_to_json_file(project.projects)
+    tools.paths_to_json_file(project.paths)
 
 
 def get_manifest_file_list(config):
@@ -59,13 +64,14 @@ def get_manifest_file_list(config):
                         manifest_file_list.append(manifest_file)
 
     os.chdir(current_path)
-    return config.manifest_root_dir, manifest_file_list
+    return manifest_file_list
 
 
 if __name__ == '__main__':
-    tools.check_result_dir()
+    config_file_name = 'config.json'
     config = read_config()
-    root_dir, manifest_file_list = get_manifest_file_list(config)
+    tools.check_static_dir(config.frontend_static_dir)
+    manifest_file_list = get_manifest_file_list(config)
     tools.write_manifest_list_to_file(manifest_file_list)
     project = Project()
-    parse_manifest(root_dir, manifest_file_list)
+    parse_manifest(config.manifest_root_dir, manifest_file_list, config.analysis_upstream_first)
