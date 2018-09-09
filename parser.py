@@ -28,6 +28,7 @@ def read_config():
                     local_config.manifest_file_list.append(line)
 
     local_config.analysis_upstream_first = config_obj.get('analysis_upstream_first', True)
+    local_config.frontend_static_dir = config_obj.get('frontend_static_dir', 'frontend/static')
     return local_config
 
 
@@ -68,8 +69,8 @@ def get_manifest_file_list(config):
 
 if __name__ == '__main__':
     config_file_name = 'config.json'
-    tools.check_result_dir()
     config = read_config()
+    tools.check_static_dir(config.frontend_static_dir)
     manifest_file_list = get_manifest_file_list(config)
     tools.write_manifest_list_to_file(manifest_file_list)
     project = Project()

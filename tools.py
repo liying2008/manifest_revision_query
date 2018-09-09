@@ -7,10 +7,10 @@ __author__ = 'liying'
 
 SEPARATOR = '@@'
 
-result_dir = 'frontend/static'
-result_manifests_dir = result_dir + '/manifests'
-result_projects_dir = result_dir + '/projects'
-result_paths_dir = result_dir + '/paths'
+static_dir = ''
+result_manifests_dir = static_dir + '/manifests'
+result_projects_dir = static_dir + '/projects'
+result_paths_dir = static_dir + '/paths'
 
 
 def dict_to_json_file(manifest_file, item_dict):
@@ -48,7 +48,7 @@ def projects_to_json_file(projects):
         with open(file_name, 'w') as fp:
             json.dump(data_list, fp)
 
-    with open(result_dir + '/projects.list', 'w') as fp:
+    with open(static_dir + '/projects.list', 'w') as fp:
         fp.write('\n'.join(project_list))
 
 
@@ -70,22 +70,33 @@ def paths_to_json_file(paths):
         with open(file_name, 'w') as fp:
             json.dump(data_list, fp)
 
-    with open(result_dir + '/paths.list', 'w') as fp:
+    with open(static_dir + '/paths.list', 'w') as fp:
         fp.write('\n'.join(path_list))
 
 
 def write_manifest_list_to_file(manifest_file_list):
-    with open(result_dir + '/manifests.list', 'w') as fp:
+    with open(static_dir + '/manifests.list', 'w') as fp:
         fp.write('\n'.join(manifest_file_list))
 
 
-def check_result_dir():
+def check_static_dir(static_dir_path):
+    global static_dir
+    global result_manifests_dir
+    global result_projects_dir
+    global result_paths_dir
+    static_dir = static_dir_path
+    result_manifests_dir = static_dir + '/manifests'
+    result_projects_dir = static_dir + '/projects'
+    result_paths_dir = static_dir + '/paths'
+
+    if not os.path.exists(static_dir):
+        os.makedirs(static_dir, 0o777)
     if os.path.exists(result_manifests_dir):
         shutil.rmtree(result_manifests_dir)
     if os.path.exists(result_projects_dir):
         shutil.rmtree(result_projects_dir)
     if os.path.exists(result_paths_dir):
         shutil.rmtree(result_paths_dir)
-    os.mkdir(result_manifests_dir)
-    os.mkdir(result_projects_dir)
-    os.mkdir(result_paths_dir)
+    os.mkdir(result_manifests_dir, 0o777)
+    os.mkdir(result_projects_dir, 0o777)
+    os.mkdir(result_paths_dir, 0o777)

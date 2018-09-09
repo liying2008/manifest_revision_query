@@ -7,6 +7,7 @@
           <el-autocomplete
             class="inline-input"
             v-model="project"
+            ref="input_project"
             clearable
             :fetch-suggestions="queryProject"
             :placeholder="projectInputPlaceholder"
@@ -82,11 +83,16 @@
         </el-table-column>
       </el-table>
     </el-container>
+    <help-dialog
+      :show="helpDialogVisible"
+      @closeDialog="helpDialogVisible=false">
+    </help-dialog>
   </div>
 </template>
 
 <script>
   import {LOCAL_STORAGE_SELECT, SEPARATOR} from '@/components/constants';
+  import Help from '@/components/Help';
 
   export default {
     name: 'Main',
@@ -101,7 +107,8 @@
         projects: [],
         paths: [],
         manifests: [],
-        tableData: []
+        tableData: [],
+        helpDialogVisible: false
       }
     },
     computed: {
@@ -126,7 +133,7 @@
         this.select = select
       }
       // project 自动完成列表
-      this.$axios.get('/static/projects.list').then((res) => {
+      this.$axios.get('static/projects.list').then((res) => {
         let projects = res.data.split('\n');
         this.projects = projects.map(project => {
           let obj = {};
@@ -135,7 +142,7 @@
         });
       });
       // path 自动完成列表
-      this.$axios.get('/static/paths.list').then((res) => {
+      this.$axios.get('static/paths.list').then((res) => {
         let paths = res.data.split('\n');
         this.paths = paths.map(path => {
           let obj = {};
@@ -144,7 +151,7 @@
         });
       });
       // manifest 自动完成列表
-      this.$axios.get('/static/manifests.list').then((res) => {
+      this.$axios.get('static/manifests.list').then((res) => {
         let manifests = res.data.split('\n');
         this.manifests = manifests.map(manifest => {
           let obj = {};
@@ -154,18 +161,47 @@
       });
       // 全局添加按键监听
       document.onkeydown = (event) => {
-        this.keyCheck(event)
+        return this.keyCheck(event)
       }
     },
     methods: {
       keyCheck(event) {
         // 键盘按键监听处理
-        console.log(event);
-        if (event.code === 'Enter') {
-          this.search()
-        } else if (event.code === 'Slash' && event.shiftKey) {
-          // 显示网站帮助
+        // console.log(event);
+        if (this.helpDialogVisible) {
+          if (event.key.toLowerCase() === 'q') {
+            // 隐藏网站帮助
+            this.helpDialogVisible = false;
+            return false
+          }
+        } else {
+          if (event.key.toLowerCase() === 'enter') {
+            this.search();
+            return false
+          } else if (event.key.toLowerCase() === 'p') {
+            // Project 输入框获取焦点
+            let inputProject = this.$refs.input_project;
+            if (!inputProject.activeElement) {
+              inputProject.focus();
+              // 阻止 按键事件继续传递
+              return false
+            }
+          } else if (event.key.toLowerCase() === 'm') {
+            // Manifest 输入框获取焦点
+            let inputManifest = this.$refs.input_manifest;
+            if (!inputManifest.activeElement) {
+              inputManifest.focus();
+              // 阻止 按键事件继续传递
+              return false
+            }
+          }
         }
+        if (event.key === '?') {
+          // 显示或隐藏网站帮助
+          this.helpDialogVisible = !this.helpDialogVisible;
+          return false
+        }
+        return true
       },
       searchProject(row, column, cell, event) {
         // console.log(row);
@@ -224,7 +260,7 @@
       },
       loadDataFromManifest(filterProject) {
         let manifest = this.manifest.replace(/\//g, SEPARATOR).trim();
-        this.$axios.get('/static/manifests/' + manifest).then((res) => {
+        this.$axios.get('static/manifests/' + manifest).then((res) => {
           // console.log(res.data)
           if (!filterProject) {
             this.tableData = res.data
@@ -252,9 +288,9 @@
         console.log(project);
         let url = '';
         if (this.select === 'project') {
-          url = '/static/projects/' + project
+          url = 'static/projects/' + project
         } else {
-          url = '/static/paths/' + project
+          url = 'static/paths/' + project
         }
         this.$axios.get(url).then((res) => {
           // console.log(res.data)
@@ -289,6 +325,9 @@
         this.loading = false;
       }
     },
+    components: {
+      'help-dialog': Help
+    }
   }
 </script>
 

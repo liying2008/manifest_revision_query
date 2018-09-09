@@ -3,5 +3,6 @@
   "manifest_dirs_for_query": [
   ],
   "manifest_file_list": "manifest_files.txt",
-  "analysis_upstream_first": true
+  "analysis_upstream_first": true,
+  "frontend_static_dir": "D:/phpStudy/WWW/manifest/static"
 }
