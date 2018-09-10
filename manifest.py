@@ -131,7 +131,7 @@ class Manifest(object):
         :return: default
         :return: remove_projects
         """
-        print(self.manifest_file)
+        print('[' + self.manifest_file + ']')
         # 解析成 DOM 树
         dom_tree = minidom.parse(self.manifest_file)
         # 得到根节点

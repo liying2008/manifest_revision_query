@@ -3,6 +3,8 @@ import json
 import os
 import shutil
 
+from data_info import DataInfo
+
 __author__ = 'liying'
 
 SEPARATOR = '@@'
@@ -11,6 +13,8 @@ static_dir = ''
 result_manifests_dir = static_dir + '/manifests'
 result_projects_dir = static_dir + '/projects'
 result_paths_dir = static_dir + '/paths'
+
+data_info = DataInfo()
 
 
 def dict_to_json_file(manifest_file, item_dict):
@@ -48,6 +52,7 @@ def projects_to_json_file(projects):
         with open(file_name, 'w') as fp:
             json.dump(data_list, fp)
 
+    data_info.projects_num = len(project_list)
     with open(static_dir + '/projects.list', 'w') as fp:
         fp.write('\n'.join(project_list))
 
@@ -75,6 +80,7 @@ def paths_to_json_file(paths):
 
 
 def write_manifest_list_to_file(manifest_file_list):
+    data_info.manifest_files_num = len(manifest_file_list)
     with open(static_dir + '/manifests.list', 'w') as fp:
         fp.write('\n'.join(manifest_file_list))
 
@@ -100,3 +106,8 @@ def check_static_dir(static_dir_path):
     os.mkdir(result_manifests_dir, 0o777)
     os.mkdir(result_projects_dir, 0o777)
     os.mkdir(result_paths_dir, 0o777)
+
+
+def write_data_info_to_file():
+    with open(static_dir + '/data_info.json', 'w') as fp:
+        fp.write(json.dumps(dict(data_info)))

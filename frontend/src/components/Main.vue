@@ -83,6 +83,17 @@
         </el-table-column>
       </el-table>
     </el-container>
+    <el-footer height="30px">
+      <div id="footer">
+        <span>Data update time: {{dataUpdateTime}}</span>
+        <span> | </span>
+        <span>Number of manifest files: {{manifestFilesNum}}</span>
+        <span> | </span>
+        <span>Number of projects: {{projectsNum}}</span>
+        <span> | </span>
+        <span>Press "?" to view help.</span>
+      </div>
+    </el-footer>
     <help-dialog
       :show="helpDialogVisible"
       @closeDialog="helpDialogVisible=false">
@@ -99,7 +110,10 @@
 
     data() {
       return {
-        tableHeight: window.innerHeight - 124,
+        tableHeight: window.innerHeight - 130,
+        dataUpdateTime: '1970-01-01 00:00:00',
+        manifestFilesNum: '0',
+        projectsNum: '0',
         loading: false,
         select: 'project',
         project: '',
@@ -159,6 +173,12 @@
           return obj
         });
       });
+      // 数据更新时间等信息
+      this.$axios.get('static/data_info.json').then((res) => {
+        this.dataUpdateTime = res.data.update_time;
+        this.manifestFilesNum = res.data.manifest_files_num;
+        this.projectsNum = res.data.projects_num;
+      });
       // 全局添加按键监听
       document.onkeydown = (event) => {
         return this.keyCheck(event)
@@ -168,8 +188,12 @@
       keyCheck(event) {
         // 键盘按键监听处理
         // console.log(event);
+        let inputProject = this.$refs.input_project;
+        let inputManifest = this.$refs.input_manifest;
         if (this.helpDialogVisible) {
-          if (event.key.toLowerCase() === 'q') {
+          let key = event.key.toLowerCase();
+          if (key !== 'shift' && key !== 'control' && key !== 'alt' && key !== 'contextmenu' &&
+            key !== "capslock" && key !== "numlock" && key !== "pause") {
             // 隐藏网站帮助
             this.helpDialogVisible = false;
             return false
@@ -177,29 +201,34 @@
         } else {
           if (event.key.toLowerCase() === 'enter') {
             this.search();
+            // 让输入框失去焦点
+            inputProject.$el.querySelectorAll('input')[1].blur();
+            inputManifest.$el.querySelector('input').blur();
             return false
           } else if (event.key.toLowerCase() === 'p') {
             // Project 输入框获取焦点
-            let inputProject = this.$refs.input_project;
-            if (!inputProject.activeElement) {
+            if (document.activeElement !== inputProject.$el.querySelectorAll('input')[1] &&
+              document.activeElement !== inputManifest.$el.querySelector('input')) {
               inputProject.focus();
               // 阻止 按键事件继续传递
               return false
             }
           } else if (event.key.toLowerCase() === 'm') {
             // Manifest 输入框获取焦点
-            let inputManifest = this.$refs.input_manifest;
-            if (!inputManifest.activeElement) {
+            if (document.activeElement !== inputProject.$el.querySelectorAll('input')[1] &&
+              document.activeElement !== inputManifest.$el.querySelector('input')) {
               inputManifest.focus();
               // 阻止 按键事件继续传递
               return false
             }
+          } else if (event.key === '?') {
+            if (document.activeElement !== inputProject.$el.querySelectorAll('input')[1] &&
+              document.activeElement !== inputManifest.$el.querySelector('input')) {
+              // 显示网站帮助
+              this.helpDialogVisible = !this.helpDialogVisible;
+              return false
+            }
           }
-        }
-        if (event.key === '?') {
-          // 显示或隐藏网站帮助
-          this.helpDialogVisible = !this.helpDialogVisible;
-          return false
         }
         return true
       },
@@ -334,7 +363,7 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style>
   #main-container {
-    margin: 20px 26px 26px 20px;
+    margin: 0 20px 0 20px;
   }
 
   #main-container .el-header {
@@ -360,5 +389,21 @@
 
   #main-container .el-table th {
     padding: 4px 0;
+  }
+
+  #main-container .el-footer {
+    display: flex;
+    flex-direction: column;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+  }
+
+  #main-container #footer {
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
+    color: #afb4bf;
   }
 </style>

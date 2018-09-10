@@ -12,7 +12,7 @@
 
 <style>
   body {
-    width: 94%;
+    width: 96%;
     display: block;
     margin: 0 auto;
   }

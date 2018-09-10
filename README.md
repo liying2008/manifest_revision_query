@@ -14,9 +14,10 @@
 
 - **方法2**
 
-进入 frontend 目录编译。
+进入 frontend 目录编译打包。
 
 ```shell
+npm i
 npm run build
 ```
 
@@ -38,10 +39,13 @@ npm run build
 
 1. `manifest_root_dir` : manifest 根目录
 2. `manifest_dirs_for_query` : 待查询的目录
+
     > 此项设置建议留空，最好将待查询的文件列表导出到一个文件中，配置给 `manifest_file_list` 属性
 3. `manifest_file_list` : 待查询的文件列表
+
     > 格式为：一行一个文件（包含路径，路径相对于 manifest 根目录，不包含 manifest 根目录，如 `AAA/BBB/C.xml`）
-4. `analysis_upstream_first` : 是否优先解析 upstream 属性  
+4. `analysis_upstream_first` : 是否优先解析 upstream 属性 
+ 
     > true: 先解析 upstream, 无值，再解析 revision  
     > false: 只解析 revision
 5. `frontend_static_dir` : 网站 static 目录，解析结果会放到 static 目录中

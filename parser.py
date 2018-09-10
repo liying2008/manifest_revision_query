@@ -75,3 +75,4 @@ if __name__ == '__main__':
     tools.write_manifest_list_to_file(manifest_file_list)
     project = Project()
     parse_manifest(config.manifest_root_dir, manifest_file_list, config.analysis_upstream_first)
+    tools.write_data_info_to_file()
