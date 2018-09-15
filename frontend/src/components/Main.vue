@@ -1,5 +1,5 @@
 <template>
-  <div id="main-container" @keyup.native="keyCheck(event)">
+  <div id="main-container">
     <el-header>
       <el-row class="autocomplete"
               :gutter="40">
@@ -46,6 +46,7 @@
         v-loading="loading"
         align="left"
         border
+        ref="main_table"
         @cell-dblclick="searchProject"
         highlight-current-row
         style="width: 100%">
@@ -77,6 +78,8 @@
         <el-table-column
           prop="revision"
           sortable
+          :filters="revisionFilters"
+          :filter-method="filterRevision"
           header-align="center"
           label="Revision"
           width="'25%'">
@@ -122,7 +125,8 @@
         paths: [],
         manifests: [],
         tableData: [],
-        helpDialogVisible: false
+        helpDialogVisible: false,
+        revisionFilters: [],
       }
     },
     computed: {
@@ -239,23 +243,20 @@
         // console.log(event);
         if (column.property === 'manifest') {
           // 双击的 manifest
-          let manifest = cell.textContent;
-          this.manifest = manifest;
+          this.manifest = cell.textContent;
           this.project = '';
           this.loadDataFromManifest(false)
         }
         else if (column.property === 'project') {
           // 双击的 project
-          let project = cell.textContent;
-          this.project = project;
+          this.project = cell.textContent;
           this.select = 'project';
           this.manifest = '';
           this.loadDataFromProject()
         }
         else if (column.property === 'path') {
           // 双击的 path
-          let path = cell.textContent;
-          this.project = path;
+          this.project = cell.textContent;
           this.select = 'path';
           this.manifest = '';
           this.loadDataFromProject()
@@ -305,6 +306,7 @@
               this.$message.error('没有匹配项：' + this.manifest + ' & ' + this.project);
             }
           }
+          this.getRevisionFilters()
         }).catch(error => {
           console.log(error);
           this.tableData = [];
@@ -323,7 +325,8 @@
         }
         this.$axios.get(url).then((res) => {
           // console.log(res.data)
-          this.tableData = res.data
+          this.tableData = res.data;
+          this.getRevisionFilters()
         }).catch(error => {
           console.log(error);
           this.tableData = [];
@@ -352,6 +355,27 @@
           this.loadDataFromManifest(true)
         }
         this.loading = false;
+      },
+
+      getRevisionFilters() {
+        // 清除过滤
+        this.$refs.main_table.clearFilter();
+        this.revisionFilters = [];
+        let revisionSet = new Set();
+        this.tableData.forEach((value) => {
+          revisionSet.add(value.revision)
+        });
+        revisionSet.forEach((value) => {
+          let obj = {};
+          obj.text = value;
+          obj.value = value;
+          this.revisionFilters.push(obj)
+        });
+      },
+
+      filterRevision(value, row, column) {
+        const property = column['property'];
+        return row[property] === value;
       }
     },
     components: {

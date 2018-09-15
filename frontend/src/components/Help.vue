@@ -32,7 +32,7 @@
         </el-card>
       </el-col>
     </el-row>
-    <span slot="footer" class="dialog-footer">Author: 李颖</span>
+    <span slot="footer" class="dialog-footer">Version: v1.0.0 | Author: 李颖</span>
   </el-dialog>
 </template>
 
