@@ -12,6 +12,10 @@ class Config(object):
         self.manifest_dirs_for_query = []
         # 需要被查询的 manifest 文件列表
         self.manifest_file_list = []
+        # 需要被排除的 manifest 文件列表
+        self.excluded_files = []
+        # 忽略并跳过解析错误
+        self.ignore_parse_error = False
         # 是否优先解析 upstream 属性
         # True: 先解析 upstream, 无值，再解析 revision
         # False: 只解析 revision
