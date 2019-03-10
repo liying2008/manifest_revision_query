@@ -79,7 +79,9 @@ def paths_to_json_file(paths):
         fp.write('\n'.join(path_list))
 
 
-def write_manifest_list_to_file(manifest_file_list):
+def write_manifest_list_to_file():
+    files = os.listdir(result_manifests_dir)
+    manifest_file_list = list(map(lambda it: it.replace(SEPARATOR, '/'), files))
     data_info.manifest_files_num = len(manifest_file_list)
     with open(static_dir + '/manifests.list', 'w') as fp:
         fp.write('\n'.join(manifest_file_list))

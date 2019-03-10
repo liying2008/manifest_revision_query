@@ -1,8 +1,9 @@
 {
   "manifest_root_dir": "manifests",
-  "manifest_dirs_for_query": [
-  ],
+  "manifest_dirs_for_query": [],
   "manifest_file_list": "manifest_files.txt",
+  "excluded_files": [],
+  "ignore_parse_error": false,
   "analysis_upstream_first": true,
   "frontend_static_dir": "D:/phpStudy/WWW/manifest/static"
 }
