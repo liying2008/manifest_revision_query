@@ -97,6 +97,8 @@
         <span> | </span>
         <span>Number of projects: {{projectsNum}}</span>
         <span> | </span>
+        <span>Number of revisions: {{revisionsNum}}</span>
+        <span> | </span>
         <span>Press "?" to view help.</span>
       </div>
     </el-footer>
@@ -125,6 +127,7 @@
         dataUpdateTime: '1970-01-01 00:00:00',
         manifestFilesNum: '0',
         projectsNum: '0',
+        revisionsNum: '0',
         loading: false,
         projectSelect: SELECT_PROJECT_FLAG,
         manifestSelect: SELECT_MANIFEST_FLAG,
@@ -213,9 +216,10 @@
       });
       // 数据更新时间等信息
       this.$axios.get('static/data_info.json').then((res) => {
-        this.dataUpdateTime = res.data.update_time;
-        this.manifestFilesNum = res.data.manifest_files_num;
-        this.projectsNum = res.data.projects_num;
+        this.dataUpdateTime = res.data['update_time'];
+        this.manifestFilesNum = res.data['manifest_files_num'];
+        this.projectsNum = res.data['projects_num'];
+        this.revisionsNum = res.data['revisions_num'];
       });
       // 全局添加按键监听
       document.onkeydown = (event) => {

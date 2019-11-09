@@ -57,6 +57,7 @@ def projects_to_json_file(projects):
     data_info.projects_num = len(project_list)
     with open(static_dir + '/projects.list', 'w') as fp:
         fp.write('\n'.join(project_list))
+    data_info.revisions_num = len(revision_set)
     with open(static_dir + '/revisions.list', 'w') as fp:
         fp.write('\n'.join(revision_set))
 
