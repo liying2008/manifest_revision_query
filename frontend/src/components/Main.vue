@@ -105,8 +105,8 @@
 </template>
 
 <script>
-  import {LOCAL_STORAGE_SELECT, SEPARATOR} from '@/components/constants';
-  import Help from '@/components/Help';
+  import {LOCAL_STORAGE_SELECT, SEPARATOR} from './constants';
+  import Help from './Help';
 
   export default {
     name: 'Main',
@@ -246,15 +246,13 @@
           this.manifest = cell.textContent;
           this.project = '';
           this.loadDataFromManifest(false)
-        }
-        else if (column.property === 'project') {
+        } else if (column.property === 'project') {
           // 双击的 project
           this.project = cell.textContent;
           this.select = 'project';
           this.manifest = '';
           this.loadDataFromProject()
-        }
-        else if (column.property === 'path') {
+        } else if (column.property === 'path') {
           // 双击的 path
           this.project = cell.textContent;
           this.select = 'path';

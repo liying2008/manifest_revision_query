@@ -32,14 +32,22 @@
         </el-card>
       </el-col>
     </el-row>
-    <span slot="footer" class="dialog-footer">Version: v1.0.0 | Author: 李颖</span>
+    <span slot="footer" class="dialog-footer">Version: {{version}} | Author: {{author}}</span>
   </el-dialog>
 </template>
 
 <script>
+  import {version, author} from '../../package.json';
+
   export default {
     name: 'Help',
     props: ['show'],
+    data() {
+      return {
+        version,
+        author,
+      }
+    },
     computed: {
       dialogVisible() {
         return this.show;
