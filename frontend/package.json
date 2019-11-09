@@ -1,6 +1,6 @@
 {
   "name": "manifest_branch_query",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A frontend of manifest branches query.",
   "author": "liying2008 <liruoer2008@yeah.net>",
   "private": true,

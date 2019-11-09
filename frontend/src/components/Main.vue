@@ -133,6 +133,7 @@
         projects: [],
         paths: [],
         manifests: [],
+        revisions: [],
         tableData: [],
         helpDialogVisible: false,
         revisionFilters: [],
@@ -198,6 +199,15 @@
         this.manifests = manifests.map(manifest => {
           let obj = {};
           obj["value"] = manifest;
+          return obj
+        });
+      });
+      // revision 自动完成列表
+      this.$axios.get('static/revisions.list').then((res) => {
+        let revisions = res.data.split('\n');
+        this.revisions = revisions.map(revision => {
+          let obj = {};
+          obj["value"] = revision;
           return obj
         });
       });
@@ -304,7 +314,13 @@
         }
         return true
       },
-
+      /**
+       * 双击单元格触发事件
+       * @param row
+       * @param column
+       * @param cell
+       * @param event
+       */
       cellDoubleClick(row, column, cell, event) {
         // console.log(row);
         // console.log(column);
@@ -330,19 +346,34 @@
           this.loadDataFromProject(false)
         }
       },
+      /**
+       * project/path 输入建议（自动完成）
+       * @param queryString 输入的查询字符串
+       * @param cb 回调函数
+       */
       queryProject(queryString, cb) {
         let projects = [];
         if (this.projectSelect === SELECT_PROJECT_FLAG) {
           projects = this.projects;
-        } else {
+        } else if (this.projectSelect === SELECT_PATH_FLAG) {
           projects = this.paths;
         }
         let results = queryString ? projects.filter(this.createFilter(queryString)) : projects;
         // 调用 callback 返回建议列表的数据
         cb(results);
       },
+      /**
+       * manifest/revision 输入建议（自动完成）
+       * @param queryString 输入的查询字符串
+       * @param cb 回调函数
+       */
       queryManifest(queryString, cb) {
-        let manifests = this.manifests;
+        let manifests = [];
+        if (this.manifestSelect === SELECT_MANIFEST_FLAG) {
+          manifests = this.manifests;
+        } else if (this.manifestSelect === SELECT_REVISION_FLAG) {
+          manifests = this.revisions;
+        }
         let results = queryString ? manifests.filter(this.createFilter(queryString)) : manifests;
         // 调用 callback 返回建议列表的数据
         cb(results);
