@@ -105,6 +105,7 @@
 </template>
 
 <script>
+  import merge from 'webpack-merge';
   import {LOCAL_STORAGE_SELECT, SEPARATOR} from './constants';
   import Help from './Help';
 
@@ -186,6 +187,41 @@
       // 全局添加按键监听
       document.onkeydown = (event) => {
         return this.keyCheck(event)
+      };
+      // 解析 URL 参数
+      let query = this.$route.query;
+      // console.log('query', query);
+      let project = query.project;
+      let path = query.path;
+      let manifest = query.manifest;
+      let revision = query.revision;
+      console.log('project:', project, 'path:', path, 'manifest:', manifest, 'revision:', revision);
+      if (project) {
+        this.select = 'project';
+        if (Array.isArray(project)) {
+          this.project = project[0]
+        } else {
+          this.project = project
+        }
+      }
+      if (path) {
+        this.select = 'path';
+        if (Array.isArray(path)) {
+          this.project = path[0]
+        } else {
+          this.project = path
+        }
+      }
+      if (manifest) {
+        if (Array.isArray(manifest)) {
+          this.manifest = manifest[0]
+        } else {
+          this.manifest = manifest
+        }
+      }
+      // 如果 project or path or manifest 不为空，开始搜索
+      if (this.project || this.path || this.manifest) {
+        this.search()
       }
     },
     methods: {
@@ -288,22 +324,39 @@
       },
       loadDataFromManifest(filterProject) {
         let manifest = this.manifest.replace(/\//g, SEPARATOR).trim();
+        // 查询字符串（URL query）
+        let queryParams = {};
         this.$axios.get('static/manifests/' + manifest).then((res) => {
           // console.log(res.data)
           if (!filterProject) {
+            queryParams = {
+              query: merge({}, {'manifest': this.manifest})
+            };
             this.tableData = res.data
           } else {
-            this.tableData = res.data.filter((val) => {
-              if (this.select === 'project') {
+            if (this.select === 'project') {
+              queryParams = {
+                query: merge({}, {'manifest': this.manifest, 'project': this.project})
+              };
+              this.tableData = res.data.filter((val) => {
                 return val.project === this.project
-              } else {
+              })
+            } else {
+              queryParams = {
+                query: merge({}, {'manifest': this.manifest, 'path': this.project})
+              };
+              this.tableData = res.data.filter((val) => {
                 return val.path === this.project
-              }
-            });
+              })
+            }
             if (this.tableData.length === 0) {
               this.$message.error('没有匹配项：' + this.manifest + ' & ' + this.project);
             }
           }
+          // 修改 URL query string
+          this.$router.replace(queryParams).catch(err => {
+            // console.log('err', err)
+          });
           this.getRevisionFilters()
         }).catch(error => {
           console.log(error);
@@ -316,11 +369,23 @@
         let project = this.project.replace(/\//g, SEPARATOR, -1).trim();
         console.log(project);
         let url = '';
+        // 查询字符串（URL query）
+        let queryParams = {};
         if (this.select === 'project') {
+          queryParams = {
+            query: merge({}, {'project': this.project})
+          };
           url = 'static/projects/' + project
         } else {
+          queryParams = {
+            query: merge({}, {'path': this.project})
+          };
           url = 'static/paths/' + project
         }
+        // 修改 URL query string
+        this.$router.replace(queryParams).catch(err => {
+          // console.log('err', err)
+        });
         this.$axios.get(url).then((res) => {
           // console.log(res.data)
           this.tableData = res.data;
