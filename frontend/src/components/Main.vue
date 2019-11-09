@@ -6,13 +6,13 @@
         <el-col :span="10">
           <el-autocomplete
             class="inline-input"
+            clearable
             v-model="project"
             ref="input_project"
-            clearable
             :fetch-suggestions="queryProject"
             :placeholder="projectInputPlaceholder"
             @select="handleSelect">
-            <el-select v-model="select" slot="prepend" :value="select">
+            <el-select v-model="projectSelect" slot="prepend" :value="projectSelect">
               <el-option label="Project" value="project"></el-option>
               <el-option label="Path" value="path"></el-option>
             </el-select>
@@ -25,9 +25,12 @@
             v-model="manifest"
             ref="input_manifest"
             :fetch-suggestions="queryManifest"
-            placeholder="Please enter manifest file name"
+            :placeholder="manifestInputPlaceholder"
             @select="handleSelect">
-            <template slot="prepend">Manifest File</template>
+            <el-select v-model="manifestSelect" slot="prepend" :value="manifestSelect">
+              <el-option label="Manifest" value="manifest"></el-option>
+              <el-option label="Revision" value="revision"></el-option>
+            </el-select>
           </el-autocomplete>
         </el-col>
         <el-col :span="4">
@@ -47,7 +50,7 @@
         align="left"
         border
         ref="main_table"
-        @cell-dblclick="searchProject"
+        @cell-dblclick="cellDoubleClick"
         highlight-current-row
         style="width: 100%">
         <el-table-column
@@ -105,9 +108,13 @@
 </template>
 
 <script>
-  import merge from 'webpack-merge';
-  import {LOCAL_STORAGE_SELECT, SEPARATOR} from './constants';
+  import {PROJECT_PATH_SELECT, MANIFEST_REVISION_SELECT, SEPARATOR} from './constants';
   import Help from './Help';
+
+  const SELECT_PROJECT_FLAG = 'project';
+  const SELECT_PATH_FLAG = 'path';
+  const SELECT_MANIFEST_FLAG = 'manifest';
+  const SELECT_REVISION_FLAG = 'revision';
 
   export default {
     name: 'Main',
@@ -119,7 +126,8 @@
         manifestFilesNum: '0',
         projectsNum: '0',
         loading: false,
-        select: 'project',
+        projectSelect: SELECT_PROJECT_FLAG,
+        manifestSelect: SELECT_MANIFEST_FLAG,
         project: '',
         manifest: '',
         projects: [],
@@ -132,24 +140,39 @@
     },
     computed: {
       projectInputPlaceholder() {
-        if (this.select === 'project') {
+        if (this.projectSelect === SELECT_PROJECT_FLAG) {
           return 'Please enter project name'
         } else {
-          return 'Please enter path'
+          return 'Please enter project path'
         }
-      }
+      },
+      manifestInputPlaceholder() {
+        if (this.manifestSelect === 'manifest') {
+          return 'Please enter manifest file name'
+        } else {
+          return 'Please enter revision'
+        }
+      },
     },
     watch: {
-      select: function (newValue, oldValue) {
+      projectSelect: function (newValue, oldValue) {
         // 将用户的选择持久化存储到 Local Storage
-        localStorage.setItem(LOCAL_STORAGE_SELECT, newValue);
-      }
+        localStorage.setItem(PROJECT_PATH_SELECT, newValue);
+      },
+      manifestSelect: function (newValue, oldValue) {
+        // 将用户的选择持久化存储到 Local Storage
+        localStorage.setItem(MANIFEST_REVISION_SELECT, newValue);
+      },
     },
     mounted() {
       // 从 Local Storage 中读取用户上次的选择
-      let select = localStorage.getItem(LOCAL_STORAGE_SELECT);
-      if (select === 'project' || select === 'path') {
-        this.select = select
+      let projectSelect = localStorage.getItem(PROJECT_PATH_SELECT);
+      if (projectSelect === SELECT_PROJECT_FLAG || projectSelect === SELECT_PATH_FLAG) {
+        this.projectSelect = projectSelect
+      }
+      let manifestSelect = localStorage.getItem(MANIFEST_REVISION_SELECT);
+      if (manifestSelect === SELECT_MANIFEST_FLAG || manifestSelect === SELECT_REVISION_FLAG) {
+        this.manifestSelect = manifestSelect
       }
       // project 自动完成列表
       this.$axios.get('static/projects.list').then((res) => {
@@ -197,7 +220,7 @@
       let revision = query.revision;
       console.log('project:', project, 'path:', path, 'manifest:', manifest, 'revision:', revision);
       if (project) {
-        this.select = 'project';
+        this.projectSelect = SELECT_PROJECT_FLAG;
         if (Array.isArray(project)) {
           this.project = project[0]
         } else {
@@ -205,7 +228,7 @@
         }
       }
       if (path) {
-        this.select = 'path';
+        this.projectSelect = SELECT_PATH_FLAG;
         if (Array.isArray(path)) {
           this.project = path[0]
         } else {
@@ -213,14 +236,23 @@
         }
       }
       if (manifest) {
+        this.manifestSelect = SELECT_MANIFEST_FLAG;
         if (Array.isArray(manifest)) {
           this.manifest = manifest[0]
         } else {
           this.manifest = manifest
         }
       }
+      if (revision) {
+        this.manifestSelect = SELECT_REVISION_FLAG;
+        if (Array.isArray(revision)) {
+          this.manifest = revision[0]
+        } else {
+          this.manifest = revision
+        }
+      }
       // 如果 project or path or manifest 不为空，开始搜索
-      if (this.project || this.path || this.manifest) {
+      if (this.project || (this.manifest && this.manifestSelect === SELECT_MANIFEST_FLAG)) {
         this.search()
       }
     },
@@ -272,7 +304,8 @@
         }
         return true
       },
-      searchProject(row, column, cell, event) {
+
+      cellDoubleClick(row, column, cell, event) {
         // console.log(row);
         // console.log(column);
         // console.log(cell);
@@ -280,25 +313,26 @@
         if (column.property === 'manifest') {
           // 双击的 manifest
           this.manifest = cell.textContent;
+          this.manifestSelect = SELECT_MANIFEST_FLAG;
           this.project = '';
           this.loadDataFromManifest(false)
         } else if (column.property === 'project') {
           // 双击的 project
           this.project = cell.textContent;
-          this.select = 'project';
+          this.projectSelect = SELECT_PROJECT_FLAG;
           this.manifest = '';
-          this.loadDataFromProject()
+          this.loadDataFromProject(false)
         } else if (column.property === 'path') {
           // 双击的 path
           this.project = cell.textContent;
-          this.select = 'path';
+          this.projectSelect = SELECT_PATH_FLAG;
           this.manifest = '';
-          this.loadDataFromProject()
+          this.loadDataFromProject(false)
         }
       },
       queryProject(queryString, cb) {
         let projects = [];
-        if (this.select === 'project') {
+        if (this.projectSelect === SELECT_PROJECT_FLAG) {
           projects = this.projects;
         } else {
           projects = this.paths;
@@ -322,29 +356,36 @@
         // 点击选中建议项时触发
         // console.log(item);
       },
+      /**
+       * 根据 manifest file 加载数据
+       * @param filterProject 是否过滤 project/path
+       */
       loadDataFromManifest(filterProject) {
         let manifest = this.manifest.replace(/\//g, SEPARATOR).trim();
+        console.log('loadDataFromManifest', manifest);
         // 查询字符串（URL query）
-        let queryParams = {};
+        let queryParams = {query: {'manifest': this.manifest}};
+        if (filterProject && this.project) {
+          if (this.projectSelect === SELECT_PROJECT_FLAG) {
+            queryParams.query.project = this.project;
+          } else if (this.projectSelect === SELECT_PATH_FLAG) {
+            queryParams.query.path = this.project;
+          }
+        }
+        // 修改 URL query string
+        this.$router.replace(queryParams).catch(err => {
+          console.log('err', err)
+        });
         this.$axios.get('static/manifests/' + manifest).then((res) => {
           // console.log(res.data)
-          if (!filterProject) {
-            queryParams = {
-              query: merge({}, {'manifest': this.manifest})
-            };
+          if (!filterProject || !this.project) {
             this.tableData = res.data
           } else {
-            if (this.select === 'project') {
-              queryParams = {
-                query: merge({}, {'manifest': this.manifest, 'project': this.project})
-              };
+            if (this.projectSelect === SELECT_PROJECT_FLAG) {
               this.tableData = res.data.filter((val) => {
                 return val.project === this.project
               })
             } else {
-              queryParams = {
-                query: merge({}, {'manifest': this.manifest, 'path': this.project})
-              };
               this.tableData = res.data.filter((val) => {
                 return val.path === this.project
               })
@@ -353,10 +394,6 @@
               this.$message.error('没有匹配项：' + this.manifest + ' & ' + this.project);
             }
           }
-          // 修改 URL query string
-          this.$router.replace(queryParams).catch(err => {
-            // console.log('err', err)
-          });
           this.getRevisionFilters()
         }).catch(error => {
           console.log(error);
@@ -364,58 +401,72 @@
           this.$message.error('未找到 Manifest 文件：' + this.manifest);
         });
       },
-
-      loadDataFromProject() {
+      /**
+       * 根据 project name or path 加载数据
+       * @param filterRevision 是否过滤 revision
+       */
+      loadDataFromProject(filterRevision) {
         let project = this.project.replace(/\//g, SEPARATOR, -1).trim();
-        console.log(project);
+        console.log('loadDataFromProject', project);
         let url = '';
         // 查询字符串（URL query）
-        let queryParams = {};
-        if (this.select === 'project') {
-          queryParams = {
-            query: merge({}, {'project': this.project})
-          };
+        let queryParams = {query: {}};
+        if (this.projectSelect === SELECT_PROJECT_FLAG) {
+          queryParams.query.project = this.project;
           url = 'static/projects/' + project
         } else {
-          queryParams = {
-            query: merge({}, {'path': this.project})
-          };
+          queryParams.query.path = this.project;
           url = 'static/paths/' + project
+        }
+        if (filterRevision && this.manifest) {
+          queryParams.query.revision = this.manifest;
         }
         // 修改 URL query string
         this.$router.replace(queryParams).catch(err => {
-          // console.log('err', err)
+          console.log('err', err)
         });
         this.$axios.get(url).then((res) => {
           // console.log(res.data)
-          this.tableData = res.data;
+          if (!filterRevision || !this.manifest) {
+            this.tableData = res.data;
+          } else {
+            this.tableData = res.data.filter((val) => {
+              return val.revision === this.manifest
+            })
+          }
           this.getRevisionFilters()
         }).catch(error => {
           console.log(error);
           this.tableData = [];
-          if (this.select === 'project') {
+          if (this.projectSelect === SELECT_PROJECT_FLAG) {
             this.$message.error('未找到 Project：' + this.project);
           } else {
             this.$message.error('未找到 Path：' + this.project);
           }
         });
       },
-
+      /**
+       * 执行搜索
+       */
       search() {
         this.loading = true;
         this.project = this.project.trim();
         this.manifest = this.manifest.trim();
-        if (this.project === '' && this.manifest === '') {
+        if (!this.project && (!this.manifest || this.manifestSelect === SELECT_REVISION_FLAG)) {
           this.$message.error('Project/Path 和 Manifest 需要至少填写一项');
-        } else if (this.project === '') {
+        } else if (!this.project && this.manifestSelect === SELECT_MANIFEST_FLAG) {
           // manifest 有值
           this.loadDataFromManifest(false)
-        } else if (this.manifest === '') {
+        } else if (!this.manifest) {
           // project 有值
-          this.loadDataFromProject()
+          this.loadDataFromProject(false)
         } else {
           // project 和 manifest 都有值
-          this.loadDataFromManifest(true)
+          if (this.manifestSelect === SELECT_MANIFEST_FLAG) {
+            this.loadDataFromManifest(true)
+          } else if (this.manifestSelect === SELECT_REVISION_FLAG) {
+            this.loadDataFromProject(true)
+          }
         }
         this.loading = false;
       },

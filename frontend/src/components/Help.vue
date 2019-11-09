@@ -13,7 +13,7 @@
           </div>
           <div class="text item">
             <p><kbd>p</kbd> : 光标快速定位到 <code>Project/Path</code> 输入框 </p>
-            <p><kbd>m</kbd> : 光标快速定位到 <code>Manifest File</code> 输入框 </p>
+            <p><kbd>m</kbd> : 光标快速定位到 <code>Manifest/Revision</code> 输入框 </p>
             <p><kbd>Enter</kbd> : 搜索 </p>
             <p><kbd>?</kbd> ( <kbd>shift + /</kbd> ) : 打开“网站帮助”</p>
           </div>
