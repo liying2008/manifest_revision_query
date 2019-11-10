@@ -3,6 +3,7 @@
   "version": "1.2.0",
   "description": "A frontend of manifest branches query.",
   "author": "liying2008 <liruoer2008@yeah.net>",
+  "git": "https://github.com/liying2008/manifest_revision_query",
   "private": true,
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",

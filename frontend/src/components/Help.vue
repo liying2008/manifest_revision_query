@@ -32,12 +32,13 @@
         </el-card>
       </el-col>
     </el-row>
-    <span slot="footer" class="dialog-footer">Version: {{version}} | Author: {{author}}</span>
+    <span slot="footer" class="dialog-footer">Version: {{version}} | Author: {{author}} |
+      View source: <a :href="git" target="_blank">GitHub</a></span>
   </el-dialog>
 </template>
 
 <script>
-  import {version, author} from '../../package.json';
+  import {version, author, git} from '../../package.json';
 
   export default {
     name: 'Help',
@@ -46,6 +47,7 @@
       return {
         version,
         author,
+        git,
       }
     },
     computed: {
@@ -102,6 +104,11 @@
   }
 
   #help-container .dialog-footer {
+    color: #cccccc;
+    font-size: 0.8em;
+  }
+
+  #help-container .dialog-footer a {
     color: #cccccc;
     font-size: 0.8em;
   }
