@@ -169,6 +169,7 @@
       },
     },
     mounted() {
+      // console.log('page mounted.');
       // 从 Local Storage 中读取用户上次的选择
       let projectSelect = localStorage.getItem(PROJECT_PATH_SELECT);
       if (projectSelect === SELECT_PROJECT_FLAG || projectSelect === SELECT_PATH_FLAG) {
