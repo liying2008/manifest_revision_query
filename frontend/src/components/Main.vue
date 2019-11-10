@@ -382,6 +382,10 @@
         // 调用 callback 返回建议列表的数据
         cb(results);
       },
+      /**
+       * 自动完成列表过滤条件
+       * @param queryString 输入的查询字符串
+       */
       createFilter(queryString) {
         return (restaurant) => {
           return (restaurant.value.toLowerCase().indexOf(queryString.toLowerCase()) >= 0);
@@ -414,7 +418,10 @@
         this.$axios.get('static/manifests/' + manifest).then((res) => {
           // console.log(res.data)
           if (!filterProject || !this.project) {
-            this.tableData = res.data
+            this.tableData = res.data;
+            if (this.tableData.length === 0) {
+              this.$message.error('manifest: ' + this.manifest + ' 不包含 project');
+            }
           } else {
             if (this.projectSelect === SELECT_PROJECT_FLAG) {
               this.tableData = res.data.filter((val) => {
@@ -426,10 +433,10 @@
               })
             }
             if (this.tableData.length === 0) {
-              this.$message.error('没有匹配项：' + this.manifest + ' & ' + this.project);
+              this.$message.error('没有匹配项： manifest: ' + this.manifest + ' AND ' + this.projectSelect + ': ' + this.project);
             }
           }
-          this.getRevisionFilters()
+          this.resetRevisionFilters()
         }).catch(error => {
           console.log(error);
           this.tableData = [];
@@ -467,9 +474,12 @@
           } else {
             this.tableData = res.data.filter((val) => {
               return val.revision === this.manifest
-            })
+            });
+            if (this.tableData.length === 0) {
+              this.$message.error('没有匹配项： ' + this.projectSelect + ': ' + this.project + ' AND revision: ' + this.manifest);
+            }
           }
-          this.getRevisionFilters()
+          this.resetRevisionFilters()
         }).catch(error => {
           console.log(error);
           this.tableData = [];
@@ -505,8 +515,10 @@
         }
         this.loading = false;
       },
-
-      getRevisionFilters() {
+      /**
+       * 重置 revision 过滤列表
+       */
+      resetRevisionFilters() {
         // 清除过滤
         this.$refs.main_table.clearFilter();
         this.revisionFilters = [];
@@ -521,7 +533,13 @@
           this.revisionFilters.push(obj)
         });
       },
-
+      /**
+       * revision 过滤方法
+       * @param value
+       * @param row
+       * @param column
+       * @returns {boolean}
+       */
       filterRevision(value, row, column) {
         const property = column['property'];
         return row[property] === value;
