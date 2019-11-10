@@ -104,12 +104,12 @@
   }
 
   #help-container .dialog-footer {
-    color: #cccccc;
+    color: #afb4bf;
     font-size: 0.8em;
   }
 
   #help-container .dialog-footer a {
-    color: #cccccc;
+    color: #afb4bf;
     font-size: 0.8em;
   }
 
