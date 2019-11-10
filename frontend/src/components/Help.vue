@@ -13,7 +13,7 @@
           </div>
           <div class="text item">
             <p><kbd>p</kbd> : 光标快速定位到 <code>Project/Path</code> 输入框 </p>
-            <p><kbd>m</kbd> : 光标快速定位到 <code>Manifest File</code> 输入框 </p>
+            <p><kbd>m</kbd> : 光标快速定位到 <code>Manifest/Revision</code> 输入框 </p>
             <p><kbd>Enter</kbd> : 搜索 </p>
             <p><kbd>?</kbd> ( <kbd>shift + /</kbd> ) : 打开“网站帮助”</p>
           </div>
@@ -32,14 +32,24 @@
         </el-card>
       </el-col>
     </el-row>
-    <span slot="footer" class="dialog-footer">Version: v1.0.0 | Author: 李颖</span>
+    <span slot="footer" class="dialog-footer">Version: {{version}} | Author: {{author}} |
+      View source: <a :href="git" target="_blank">GitHub</a></span>
   </el-dialog>
 </template>
 
 <script>
+  import {version, author, git} from '../../package.json';
+
   export default {
     name: 'Help',
     props: ['show'],
+    data() {
+      return {
+        version,
+        author,
+        git,
+      }
+    },
     computed: {
       dialogVisible() {
         return this.show;
@@ -94,7 +104,12 @@
   }
 
   #help-container .dialog-footer {
-    color: #cccccc;
+    color: #afb4bf;
+    font-size: 0.8em;
+  }
+
+  #help-container .dialog-footer a {
+    color: #afb4bf;
     font-size: 0.8em;
   }
 

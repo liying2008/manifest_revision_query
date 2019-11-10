@@ -1,30 +1,26 @@
-# Manifest 分支查询
+# Manifest Revision Query
 
-包含脚本和网站。
+该仓库包含 **manifest 文件解析脚本**和**前端查询页面**。
 
-## 环境：
-
-- Python 3
-
-## 网站搭建
+## 1. 前端网站搭建
 
 - **方法1**
 
-直接从 [release](https://github.com/liying2008/manifest_revision_query/releases) 页面下载已打包好的 `dist.zip` ，解压到 web 容器中即可。
+直接从 [release](https://github.com/liying2008/manifest_revision_query/releases) 页面下载已打包好的 `dist.zip` ，解压到 web 容器（如 Apache）中即可。
 
 - **方法2**
 
-进入 frontend 目录编译打包。
+进入 `frontend` 目录自行编译打包。
 
 ```shell
 npm i
 npm run build
 ```
 
-生成物会放在 `frontend/dist` 目录中，将此目录中的文件拷贝到 web 容器中即可。
+生成物会放在 `frontend/dist` 目录中，将此目录中的文件拷贝到 web 容器（如 Apache）中即可。
 
 
-## 配置文件说明：
+## 2. 配置文件说明：
 
 ```json
 {
@@ -42,13 +38,14 @@ npm run build
 
 2. `manifest_dirs_for_query` : 待查询的目录
 
-    > 此项设置建议留空，最好将待查询的文件列表导出到一个文件中，配置给 `manifest_file_list` 属性
+    > 该目录下所有 manifest 文件都会被解析。此项设置建议留空，最好将待查询的文件列表导出到一个文件中，配置给 `manifest_file_list` 属性
 
 3. `manifest_file_list` : 待查询的文件列表
 
     > 格式为：一行一个文件（包含路径，路径相对于 manifest 根目录，不包含 manifest 根目录，如 `AAA/BBB/C.xml`）
 
 4. `excluded_files` : 需要被排除的 manifest 文件列表
+
     > 格式为：一行一个文件（包含路径，路径相对于 manifest 根目录，不包含 manifest 根目录，如 `AAA/BBB/C.xml`）
 
 5. `ignore_parse_error` : 解析 manifest 文件时遇到错误时是否忽略并跳过
@@ -60,17 +57,25 @@ npm run build
 
 7. `frontend_static_dir` : 网站 static 目录，解析结果会放到 static 目录中
 
-## 执行解析脚本：
+## 3. 执行解析脚本
+
+**脚本运行环境：**
+
+- Python 3
+
+**命令：**
 
 ```shell
 python parser.py
 ```
 
-## 界面截图
+## 4. 网站截图
+
+- **前端查询界面**
 
 ![截图](screenshots/screenshot.png)
 
-## 网站帮助
+- **网站帮助**
 
 ![网站帮助](screenshots/web_help.png)
 

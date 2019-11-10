@@ -36,6 +36,7 @@ def dict_to_json_file(manifest_file, item_dict):
 
 def projects_to_json_file(projects):
     project_list = []
+    revision_set = set()
     for project, item_list in projects.items():
         project_list.append(project)
         data_list = []
@@ -45,6 +46,7 @@ def projects_to_json_file(projects):
             data['project'] = project
             data['path'] = item.path
             data['revision'] = item.revision
+            revision_set.add(item.revision)
             data_list.append(data)
 
         file_name = result_projects_dir + '/' + str(project).replace('/', SEPARATOR)
@@ -55,6 +57,9 @@ def projects_to_json_file(projects):
     data_info.projects_num = len(project_list)
     with open(static_dir + '/projects.list', 'w') as fp:
         fp.write('\n'.join(project_list))
+    data_info.revisions_num = len(revision_set)
+    with open(static_dir + '/revisions.list', 'w') as fp:
+        fp.write('\n'.join(revision_set))
 
 
 def paths_to_json_file(paths):

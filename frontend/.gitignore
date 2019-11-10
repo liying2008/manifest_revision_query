@@ -18,6 +18,7 @@ static/manifests
 static/projects
 static/paths
 static/manifests.list
+static/revisions.list
 static/projects.list
 static/paths.list
 static/data_info.json
