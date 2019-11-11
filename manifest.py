@@ -92,7 +92,7 @@ class Manifest(object):
         # 2. 处理 items
         for project, item in items.items():
             # 真实的 project 为 @@ 之前的名称
-            project = project.split(tools.SEPARATOR)[0]
+            project = project.split(tools.PROJECT_DUPLICATION_TAG)[0]
             self.add_project(project, item)
         # 3. 处理 remote
         self.remote = dict(self.remote, **remote)
@@ -110,7 +110,7 @@ class Manifest(object):
             num = self.duplicate_projects.get(project, 1)
             num += 1
             self.duplicate_projects[project] = num
-            self.items[project + tools.SEPARATOR + str(num)] = item
+            self.items[project + tools.PROJECT_DUPLICATION_TAG + str(num)] = item
         else:
             self.items[project] = item
 
@@ -120,7 +120,7 @@ class Manifest(object):
         if project_name in self.duplicate_projects:
             num = self.duplicate_projects[project_name]
             for i in range(2, num + 1):
-                del self.items[project_name + tools.SEPARATOR + str(i)]
+                del self.items[project_name + tools.PROJECT_DUPLICATION_TAG + str(i)]
             del self.duplicate_projects[project_name]
 
     def parse(self):

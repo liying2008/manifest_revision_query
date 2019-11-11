@@ -2,12 +2,16 @@
 import json
 import os
 import shutil
+from urllib.parse import quote, unquote
 
 from data_info import DataInfo
 
 __author__ = 'liying'
 
-SEPARATOR = '@@'
+# project 重复的标记
+# 同一个manifest中可能存在多个同名project
+# 同名project解析时暂时先用@@2、@@3标记一下，之后再处理
+PROJECT_DUPLICATION_TAG = '@@'
 
 static_dir = ''
 result_manifests_dir = static_dir + '/manifests'
@@ -21,14 +25,15 @@ def dict_to_json_file(manifest_file, item_dict):
     data_list = []
     for project, item in item_dict.items():
         # 真实的 project 为 @@ 之前的名称
-        project = project.split(SEPARATOR)[0]
-        data = {}
-        data['manifest'] = manifest_file
-        data['project'] = project
-        data['path'] = item.path
-        data['revision'] = item.revision
+        project = project.split(PROJECT_DUPLICATION_TAG)[0]
+        data = {
+            'manifest': manifest_file,
+            'project': project,
+            'path': item.path,
+            'revision': item.revision
+        }
         data_list.append(data)
-    file_name = result_manifests_dir + '/' + str(manifest_file).replace('/', SEPARATOR)
+    file_name = result_manifests_dir + '/' + quote(manifest_file, safe='')
     file_name = file_name.strip()
     with open(file_name, 'w') as fp:
         json.dump(data_list, fp)
@@ -41,15 +46,16 @@ def projects_to_json_file(projects):
         project_list.append(project)
         data_list = []
         for item in item_list:
-            data = {}
-            data['manifest'] = item.manifest
-            data['project'] = project
-            data['path'] = item.path
-            data['revision'] = item.revision
+            data = {
+                'manifest': item.manifest,
+                'project': project,
+                'path': item.path,
+                'revision': item.revision
+            }
             revision_set.add(item.revision)
             data_list.append(data)
 
-        file_name = result_projects_dir + '/' + str(project).replace('/', SEPARATOR)
+        file_name = result_projects_dir + '/' + quote(project, safe='')
         file_name = file_name.strip()
         with open(file_name, 'w') as fp:
             json.dump(data_list, fp)
@@ -68,14 +74,15 @@ def paths_to_json_file(paths):
         path_list.append(path)
         data_list = []
         for item in item_list:
-            data = {}
-            data['manifest'] = item.manifest
-            data['project'] = item.project
-            data['path'] = path
-            data['revision'] = item.revision
+            data = {
+                'manifest': item.manifest,
+                'project': item.project,
+                'path': path,
+                'revision': item.revision
+            }
             data_list.append(data)
 
-        file_name = result_paths_dir + '/' + str(path).replace('/', SEPARATOR)
+        file_name = result_paths_dir + '/' + quote(path, safe='')
         file_name = file_name.strip()
         with open(file_name, 'w') as fp:
             json.dump(data_list, fp)
@@ -86,7 +93,7 @@ def paths_to_json_file(paths):
 
 def write_manifest_list_to_file():
     files = os.listdir(result_manifests_dir)
-    manifest_file_list = list(map(lambda it: it.replace(SEPARATOR, '/'), files))
+    manifest_file_list = list(map(lambda it: unquote(it), files))
     data_info.manifest_files_num = len(manifest_file_list)
     with open(static_dir + '/manifests.list', 'w') as fp:
         fp.write('\n'.join(manifest_file_list))

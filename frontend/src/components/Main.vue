@@ -110,7 +110,7 @@
 </template>
 
 <script>
-  import {PROJECT_PATH_SELECT, MANIFEST_REVISION_SELECT, SEPARATOR} from './constants';
+  import {PROJECT_PATH_SELECT, MANIFEST_REVISION_SELECT} from './constants';
   import Help from './Help';
 
   const SELECT_PROJECT_FLAG = 'project';
@@ -403,7 +403,7 @@
        * @param filterProject 是否过滤 project/path
        */
       loadDataFromManifest(filterProject) {
-        let manifest = this.manifest.replace(/\//g, SEPARATOR).trim();
+        let manifest = encodeURIComponent(this.manifest);
         console.log('loadDataFromManifest', manifest);
         // 查询字符串（URL query）
         let queryParams = {query: {'manifest': this.manifest}};
@@ -418,7 +418,7 @@
         this.$router.replace(queryParams).catch(err => {
           console.log('err', err)
         });
-        this.$axios.get('static/manifests/' + manifest).then((res) => {
+        this.$axios.get(encodeURI('static/manifests/' + manifest)).then((res) => {
           // console.log(res.data)
           if (!filterProject || !this.project) {
             this.tableData = res.data;
@@ -451,7 +451,7 @@
        * @param filterRevision 是否过滤 revision
        */
       loadDataFromProject(filterRevision) {
-        let project = this.project.replace(/\//g, SEPARATOR, -1).trim();
+        let project = encodeURIComponent(this.project);
         console.log('loadDataFromProject', project);
         let url = '';
         // 查询字符串（URL query）
@@ -470,7 +470,7 @@
         this.$router.replace(queryParams).catch(err => {
           console.log('err', err)
         });
-        this.$axios.get(url).then((res) => {
+        this.$axios.get(encodeURI(url)).then((res) => {
           // console.log(res.data)
           if (!filterRevision || !this.manifest) {
             this.tableData = res.data;
