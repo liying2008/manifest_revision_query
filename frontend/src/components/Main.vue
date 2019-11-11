@@ -286,31 +286,33 @@
             return false
           }
         } else {
+          // Project/Path 输入框
+          let projectInput = inputProject.$el.querySelectorAll('input')[1];
+          // Manifest/Revision 输入框
+          let manifestInput = inputManifest.$el.querySelectorAll('input')[1];
+
           if (event.key.toLowerCase() === 'enter') {
             this.search();
             // 让输入框失去焦点
-            inputProject.$el.querySelectorAll('input')[1].blur();
-            inputManifest.$el.querySelector('input').blur();
+            projectInput.blur();
+            manifestInput.blur();
             return false
           } else if (event.key.toLowerCase() === 'p') {
             // Project 输入框获取焦点
-            if (document.activeElement !== inputProject.$el.querySelectorAll('input')[1] &&
-              document.activeElement !== inputManifest.$el.querySelector('input')) {
+            if (document.activeElement !== projectInput && document.activeElement !== manifestInput) {
               inputProject.focus();
               // 阻止 按键事件继续传递
               return false
             }
           } else if (event.key.toLowerCase() === 'm') {
             // Manifest 输入框获取焦点
-            if (document.activeElement !== inputProject.$el.querySelectorAll('input')[1] &&
-              document.activeElement !== inputManifest.$el.querySelector('input')) {
+            if (document.activeElement !== projectInput && document.activeElement !== manifestInput) {
               inputManifest.focus();
               // 阻止 按键事件继续传递
               return false
             }
           } else if (event.key === '?') {
-            if (document.activeElement !== inputProject.$el.querySelectorAll('input')[1] &&
-              document.activeElement !== inputManifest.$el.querySelector('input')) {
+            if (document.activeElement !== projectInput && document.activeElement !== manifestInput) {
               // 显示网站帮助
               this.helpDialogVisible = !this.helpDialogVisible;
               return false
