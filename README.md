@@ -1,5 +1,8 @@
 # Manifest Revision Query
 
+[![Version](https://img.shields.io/github/release/liying2008/manifest_revision_query?label=version)](https://github.com/liying2008/manifest_revision_query/releases)
+![GitHub Pipenv locked Python version](https://img.shields.io/github/pipenv/locked/python-version/liying2008/manifest_revision_query)
+
 该仓库包含 **manifest 文件解析脚本**和**前端查询页面**。
 
 ## 1. 前端网站搭建

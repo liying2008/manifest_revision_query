@@ -110,7 +110,7 @@
 </template>
 
 <script>
-  import {PROJECT_PATH_SELECT, MANIFEST_REVISION_SELECT, SEPARATOR} from './constants';
+  import {PROJECT_PATH_SELECT, MANIFEST_REVISION_SELECT} from './constants';
   import Help from './Help';
 
   const SELECT_PROJECT_FLAG = 'project';
@@ -286,31 +286,33 @@
             return false
           }
         } else {
+          // Project/Path 输入框
+          let projectInput = inputProject.$el.querySelectorAll('input')[1];
+          // Manifest/Revision 输入框
+          let manifestInput = inputManifest.$el.querySelectorAll('input')[1];
+
           if (event.key.toLowerCase() === 'enter') {
             this.search();
             // 让输入框失去焦点
-            inputProject.$el.querySelectorAll('input')[1].blur();
-            inputManifest.$el.querySelector('input').blur();
+            projectInput.blur();
+            manifestInput.blur();
             return false
           } else if (event.key.toLowerCase() === 'p') {
             // Project 输入框获取焦点
-            if (document.activeElement !== inputProject.$el.querySelectorAll('input')[1] &&
-              document.activeElement !== inputManifest.$el.querySelector('input')) {
+            if (document.activeElement !== projectInput && document.activeElement !== manifestInput) {
               inputProject.focus();
               // 阻止 按键事件继续传递
               return false
             }
           } else if (event.key.toLowerCase() === 'm') {
             // Manifest 输入框获取焦点
-            if (document.activeElement !== inputProject.$el.querySelectorAll('input')[1] &&
-              document.activeElement !== inputManifest.$el.querySelector('input')) {
+            if (document.activeElement !== projectInput && document.activeElement !== manifestInput) {
               inputManifest.focus();
               // 阻止 按键事件继续传递
               return false
             }
           } else if (event.key === '?') {
-            if (document.activeElement !== inputProject.$el.querySelectorAll('input')[1] &&
-              document.activeElement !== inputManifest.$el.querySelector('input')) {
+            if (document.activeElement !== projectInput && document.activeElement !== manifestInput) {
               // 显示网站帮助
               this.helpDialogVisible = !this.helpDialogVisible;
               return false
@@ -401,7 +403,7 @@
        * @param filterProject 是否过滤 project/path
        */
       loadDataFromManifest(filterProject) {
-        let manifest = this.manifest.replace(/\//g, SEPARATOR).trim();
+        let manifest = encodeURIComponent(this.manifest);
         console.log('loadDataFromManifest', manifest);
         // 查询字符串（URL query）
         let queryParams = {query: {'manifest': this.manifest}};
@@ -416,7 +418,7 @@
         this.$router.replace(queryParams).catch(err => {
           console.log('err', err)
         });
-        this.$axios.get('static/manifests/' + manifest).then((res) => {
+        this.$axios.get(encodeURI('static/manifests/' + manifest)).then((res) => {
           // console.log(res.data)
           if (!filterProject || !this.project) {
             this.tableData = res.data;
@@ -449,7 +451,7 @@
        * @param filterRevision 是否过滤 revision
        */
       loadDataFromProject(filterRevision) {
-        let project = this.project.replace(/\//g, SEPARATOR, -1).trim();
+        let project = encodeURIComponent(this.project);
         console.log('loadDataFromProject', project);
         let url = '';
         // 查询字符串（URL query）
@@ -468,7 +470,7 @@
         this.$router.replace(queryParams).catch(err => {
           console.log('err', err)
         });
-        this.$axios.get(url).then((res) => {
+        this.$axios.get(encodeURI(url)).then((res) => {
           // console.log(res.data)
           if (!filterRevision || !this.manifest) {
             this.tableData = res.data;

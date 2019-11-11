@@ -26,7 +26,7 @@ class Project(object):
     def add_manifest_and_dict(self, manifest_file, item_dict):
         for project, item in item_dict.items():
             # 真实的 project 为 @@ 之前的名称
-            project = project.split(tools.SEPARATOR)[0]
+            project = project.split(tools.PROJECT_DUPLICATION_TAG)[0]
             path = item.path
             revision = item.revision
             # 添加到 projects 字典
