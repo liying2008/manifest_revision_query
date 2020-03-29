@@ -16,8 +16,8 @@
 进入 `frontend` 目录自行编译打包。
 
 ```shell
-npm i
-npm run build
+yarn
+yarn build
 ```
 
 生成物会放在 `frontend/dist` 目录中，将此目录中的文件拷贝到 web 容器（如 Apache）中即可。
