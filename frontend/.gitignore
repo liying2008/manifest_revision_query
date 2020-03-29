@@ -1,10 +1,22 @@
 .DS_Store
-node_modules/
-/dist/
+node_modules
+/dist
+public/static/manifests/
+public/static/projects/
+public/static/paths/
+public/static/manifests.list
+public/static/revisions.list
+public/static/projects.list
+public/static/paths.list
+public/static/data_info.json
+# local env files
+.env.local
+.env.*.local
+
+# Log files
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-/test/unit/coverage/
 
 # Editor directories and files
 .idea
@@ -13,14 +25,4 @@ yarn-error.log*
 *.ntvs*
 *.njsproj
 *.sln
-
-static/manifests
-static/projects
-static/paths
-static/manifests.list
-static/revisions.list
-static/projects.list
-static/paths.list
-static/data_info.json
-
-package-lock.json
+*.sw?

@@ -1,5 +1,5 @@
 #!/bin/bash
 
-cd frontend/static
+cd frontend/public/static
 rm -fr manifests paths projects *.json *.list
 cd -
