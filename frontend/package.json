@@ -12,8 +12,8 @@
   },
   "dependencies": {
     "core-js": "^2.6.5",
-    "axios": "^0.19.2",
-    "element-ui": "^2.13.0",
+    "axios": "^0.21.1",
+    "element-ui": "^2.15.0",
     "normalize.css": "^8.0.1",
     "vue": "^2.6.10",
     "vue-class-component": "^7.0.2",
